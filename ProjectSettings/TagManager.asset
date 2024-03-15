@@ -6,6 +6,7 @@ TagManager:
   tags:
   - LoadingZone
   - Bad
+  - redbox
   layers:
   - Default
   - TransparentFX
@@ -37,7 +38,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - redbox
   - Post Processing
   m_SortingLayers:
   - name: Default

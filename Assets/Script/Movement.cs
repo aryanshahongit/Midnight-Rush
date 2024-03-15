@@ -7,6 +7,7 @@ using static UnityEngine.Rendering.DebugUI;
 
 public class Movement : MonoBehaviour
 {
+    //              Pause
     public float[] FetchedValues;
     public float[] recivedvalues;
     public int currentupdateindex;
@@ -107,8 +108,7 @@ public class Movement : MonoBehaviour
         {
             if(InJump == true) {
                 rb.velocity = new Vector2(rb.velocity.x, JumpUpSmooth);
-            }
-            
+            }            
             JumpKey = false;
             HoldJumpKey = false;
         }

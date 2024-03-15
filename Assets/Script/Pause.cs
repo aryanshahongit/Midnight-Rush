@@ -5,7 +5,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Device;
 using UnityEngine.UI;
-using UnityEngine.WSA;
 using Application = UnityEngine.Application;
 
 public class Pause : MonoBehaviour

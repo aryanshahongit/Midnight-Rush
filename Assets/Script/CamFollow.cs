@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class CamFollow : MonoBehaviour
@@ -12,7 +13,7 @@ public class CamFollow : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         transform.position = new Vector3(Player.transform.position.x, transform.position.y, transform.position.z);
     }
