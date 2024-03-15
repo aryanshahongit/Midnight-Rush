@@ -70,7 +70,7 @@ public class Pause : MonoBehaviour
             pause();
        
         }
-        if (Input.GetKeyDown(KeyCode.Return));
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             changevalues();
             mv.updatevalue();
