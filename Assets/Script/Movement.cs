@@ -72,7 +72,7 @@ public class Movement : MonoBehaviour
     }
     void FixedUpdate()
     {
-        
+
         JumpCheck();
     }
 
@@ -80,14 +80,14 @@ public class Movement : MonoBehaviour
     {
         if (Grounded && JumpKey)
         {
-            rb.velocity = new Vector2(rb.velocity.x, JumpVelocityMultiply );
+            rb.velocity = new Vector2(rb.velocity.x, JumpVelocityMultiply);
             rb.AddForce(new Vector2(0, JumpForce * 10));
             InJump = true;
         }
         if (HoldJumpKey && JumpHoldTimer > 0 && InJump)
         {
             FirstJumpCheck++;
-            if(FirstJumpCheck == 1)
+            if (FirstJumpCheck == 1)
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpVelocityMultiply);
             }
@@ -104,11 +104,12 @@ public class Movement : MonoBehaviour
         {
             JumpKey = true;
         }
-        if(Input.GetButtonUp("Jump"))
+        if (Input.GetButtonUp("Jump"))
         {
-            if(InJump == true) {
+            if (InJump == true)
+            {
                 rb.velocity = new Vector2(rb.velocity.x, JumpUpSmooth);
-            }            
+            }
             JumpKey = false;
             HoldJumpKey = false;
         }
@@ -121,8 +122,8 @@ public class Movement : MonoBehaviour
 
     private void GroundCheck()
     {
-        Debug.DrawRay(transform.position, Vector3.down * RayDistance,Color.black);
-        if (Physics2D.Raycast(transform.position, Vector3.down, RayDistance,GroundLayerMask))
+        Debug.DrawRay(transform.position, Vector3.down * RayDistance, Color.black);
+        if (Physics2D.Raycast(transform.position, Vector3.down, RayDistance, GroundLayerMask))
         {
             Grounded = true;
             rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -137,7 +138,7 @@ public class Movement : MonoBehaviour
         }
     }
 
-    
+
     private void MovementHandler()
     {
         XAxis = Input.GetAxisRaw("Horizontal");
@@ -151,9 +152,9 @@ public class Movement : MonoBehaviour
             rb.gravityScale = NormalGravityScale + ReducedGravityScale;
         }
 
-        if (rb.velocity.x < MaxVelocity && rb.velocity.x > -MaxVelocity)
+        if (rb.velocity.x <= MaxVelocity && rb.velocity.x >= -MaxVelocity)
         {
-            rb.velocity += new Vector2(XAxis * Time.deltaTime * Acceleration,0);
+            rb.velocity += new Vector2(XAxis * Time.deltaTime * Acceleration, 0);
             rb.AddForce(new Vector2(XAxis, 0) * Time.deltaTime * PlayerSpeed);
         }
         if (rb.velocity.x > MaxVelocity)
@@ -164,9 +165,9 @@ public class Movement : MonoBehaviour
         {
             rb.velocity = new Vector2(-MaxVelocity, rb.velocity.y);
         }
-        if(Grounded && XAxis == 0)
+        if (Grounded && XAxis == 0)
         {
-           if(rb.velocity.x > 0)
+            if (rb.velocity.x > 0)
             {
                 rb.velocity -= new Vector2(DeAcceleration * Time.deltaTime, 0);
             }
@@ -208,7 +209,7 @@ public class Movement : MonoBehaviour
         FetchedValues[7] = JumpHoldTimer;
         FetchedValues[8] = DefaultHoldTime;
         FetchedValues[9] = GravityScale;
-        FetchedValues[10]= rb.angularDrag;
+        FetchedValues[10] = rb.angularDrag;
         FetchedValues[11] = JumpForce;
         return FetchedValues;
     }
@@ -221,7 +222,7 @@ public class Movement : MonoBehaviour
         {
             recivedvalues[currentupdateindex] = float.Parse(d.text);
             currentupdateindex++;
-            
+
         }
         currentupdateindex = 0;
         PlayerSpeed = recivedvalues[0];
@@ -238,8 +239,3 @@ public class Movement : MonoBehaviour
         JumpForce = recivedvalues[11];
     }
 }
-
-
-
-
-
