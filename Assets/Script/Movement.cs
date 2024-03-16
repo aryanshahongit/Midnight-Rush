@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.DebugUI;
@@ -19,6 +20,8 @@ public class Movement : MonoBehaviour
     [SerializeField] private float MaxVelocity;
     [SerializeField] private float Acceleration;
     [SerializeField] private float DeAcceleration;
+    //      *Bools
+
     //              Physics
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float IncreasedGravityScale;
@@ -38,6 +41,9 @@ public class Movement : MonoBehaviour
     [SerializeField] private bool JumpKey;
     [SerializeField] private bool HoldJumpKey;
     [SerializeField] private bool InJump;
+    [SerializeField] private bool StartTimer;
+    [SerializeField] private bool BufferJump;
+
     //      *Floats
     [SerializeField] private float RayDistance;
     [SerializeField] private float JumpForce;
@@ -47,6 +53,8 @@ public class Movement : MonoBehaviour
     [SerializeField] private float FirstJumpCheck;
     [SerializeField] private float GravityScale;
     [SerializeField] private float JumpVelocityMultiply;
+    [SerializeField] private float JumpBufferTime;
+    [SerializeField] private float DefaultJumpBufferTime;
 
     //      *LayerMasks
     [SerializeField] private LayerMask GroundLayerMask;
@@ -64,27 +72,51 @@ public class Movement : MonoBehaviour
     }
     private void Update()
     {
+        if (JumpKey)
+        {
+            if (!Grounded)
+            {
+                StartTimer = true;
+            }
+        }
+        if (StartTimer)
+        {
+            JumpBufferTime -= Time.deltaTime;
+            if (Grounded && JumpBufferTime > 0)
+            {
+                Debug.LogError("Buffer Jump!");
+                BufferJump = true;
+            }
+        }
+        if(BufferJump && Input.GetButtonDown("Jump"))
+        {
+            BufferJump = false;
+        }
         MovementHandler(); // Handles Moving,Velocity Clamp,Gravity,Log Outputs
         GroundCheck();// Ground Detection Using Ray Cast
         JumpKeyCheck();
         Logs();
         /*WallJumpCollisions();*/
     }
+
+
     void FixedUpdate()
     {
 
         JumpCheck();
     }
 
+
+
     private void JumpCheck()
     {
-        if (Grounded && JumpKey)
+        if (Grounded && JumpKey && !BufferJump)
         {
             rb.velocity = new Vector2(rb.velocity.x, JumpVelocityMultiply);
             rb.AddForce(new Vector2(0, JumpForce * 10));
             InJump = true;
         }
-        if (HoldJumpKey && JumpHoldTimer > 0 && InJump)
+        if (HoldJumpKey && JumpHoldTimer > 0 && InJump && !BufferJump)
         {
             FirstJumpCheck++;
             if (FirstJumpCheck == 1)
@@ -96,7 +128,15 @@ public class Movement : MonoBehaviour
             rb.AddForce(new Vector2(0, JumpForce));
             InJump = true;
         }
+        if (Grounded && BufferJump)
+        {
+            BufferJump = false;
+
+            Debug.LogError("Buffer Jump!");
+            rb.AddForce(new Vector2(500*XAxis, JumpForce * 10));
+        }
     }
+
 
     private void JumpKeyCheck()
     {
@@ -110,12 +150,15 @@ public class Movement : MonoBehaviour
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpUpSmooth);
             }
+            BufferJump = false;
             JumpKey = false;
             HoldJumpKey = false;
         }
         if (Input.GetButton("Jump"))
         {
             HoldJumpKey = true;
+            StartTimer = false;
+            JumpBufferTime = DefaultJumpBufferTime;
         }
 
     }
@@ -157,11 +200,11 @@ public class Movement : MonoBehaviour
             rb.velocity += new Vector2(XAxis * Time.deltaTime * Acceleration, 0);
             rb.AddForce(new Vector2(XAxis, 0) * Time.deltaTime * PlayerSpeed);
         }
-        if (rb.velocity.x > MaxVelocity)
+        if (rb.velocity.x > MaxVelocity && !BufferJump)
         {
             rb.velocity = new Vector2(MaxVelocity, rb.velocity.y);
         }
-        if (rb.velocity.x < -MaxVelocity)
+        if (rb.velocity.x < -MaxVelocity&& !BufferJump)
         {
             rb.velocity = new Vector2(-MaxVelocity, rb.velocity.y);
         }
@@ -177,18 +220,6 @@ public class Movement : MonoBehaviour
             }
         }
     }
-    /*private void WallJumpCollisions()
-    {
-        if (Physics2D.Raycast(transform.position, Vector2.right, RayDistance,WallLayerMask) && Input.GetButton("Jump")){
-            WallJumpRightCollosion = true;
-            rb.AddForce(new Vector2(-1 * WallJumpForce, JumpForce * 5));
-        }
-        if (Physics2D.Raycast(transform.position, Vector2.left, RayDistance,WallLayerMask))
-        {
-            WallJumpLeftCollosion = true;
-            rb.AddForce(new Vector2(1 * WallJumpForce, JumpForce * 5));
-        }
-    }*/
 
     private void Logs()
     {
