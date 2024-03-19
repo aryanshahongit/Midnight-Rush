@@ -28,6 +28,7 @@ public class Pause : MonoBehaviour
     public Movement mv;
     public float[] newvalues;
     [SerializeField] GameObject PauseMenu;
+    [SerializeField] redbox box;
     [SerializeField] bool IsPaused;
     // Start is called before the first frame update
     void Start()
@@ -80,13 +81,14 @@ public class Pause : MonoBehaviour
 
     private void unpause()
     {
+        Time.timeScale = 1;
         PauseMenu.SetActive(false);
         IsPaused = false;
     }
 
     private void pause()
     {
-        
+        Time.timeScale = 0;
         PauseMenu.SetActive(true);
         IsPaused = true;
 

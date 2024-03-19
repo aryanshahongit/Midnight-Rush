@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Threading;
+using System;
 
 public class redbox : MonoBehaviour
 {
@@ -10,7 +12,12 @@ public class redbox : MonoBehaviour
     [SerializeField] float defaultpic;
     [SerializeField] float countforexplode;
     [SerializeField] float explodeforce;
+    public float timer;
+    [SerializeField] TextMeshProUGUI MilliSecond;
+    [SerializeField] TextMeshProUGUI Minute;
+    [SerializeField] TextMeshProUGUI Second;
     [SerializeField] bool onbox;
+    public bool TimerOn;
     [SerializeField] Rigidbody2D rbplayer;
     [SerializeField] GameObject image;
     [SerializeField] GameObject player;
@@ -18,17 +25,30 @@ public class redbox : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        timer = 0;
+        TimerOn = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (TimerOn)
+        { 
+            timer += Time.deltaTime;
+            Minute.text = TimeSpan.FromSeconds(timer).ToString("mm':'ss'.'ff");
+        }
+        
+
+        /*MilliSecond.text = (timer).ToString().Substring((timer).ToString().Length - 4); 
+        Second.text = ((int)timer).ToString();
+        Minute.text = ((int)timer / 60).ToString();*/
+
         if (onbox)
         {
             countdownforpicture -= Time.deltaTime;
             if (countdownforpicture <= 0)
             {
+                TimerOn = false;
                 image.SetActive(true);
             }
             if (image.activeSelf == true)
@@ -52,6 +72,7 @@ public class redbox : MonoBehaviour
             countdownforpicture -= Time.deltaTime;
             if(countdownforpicture <= 0) {
                 image.SetActive(true);
+                TimerOn = false;
             }
             if (image.activeSelf == true)
             {

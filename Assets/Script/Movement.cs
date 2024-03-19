@@ -37,12 +37,13 @@ public class Movement : MonoBehaviour
     //              Jumps
 
     //      *Bools
-    [SerializeField] private bool Grounded;
+    [SerializeField] public bool Grounded;
     [SerializeField] private bool JumpKey;
     [SerializeField] private bool HoldJumpKey;
-    [SerializeField] private bool InJump;
+    [SerializeField] public bool InJump;
     [SerializeField] private bool StartTimer;
     [SerializeField] private bool BufferJump;
+    [SerializeField] private bool CanBhop;
 
     //      *Floats
     [SerializeField] private float RayDistance;
@@ -55,16 +56,19 @@ public class Movement : MonoBehaviour
     [SerializeField] private float JumpVelocityMultiply;
     [SerializeField] private float JumpBufferTime;
     [SerializeField] private float DefaultJumpBufferTime;
+    [SerializeField] private float JumpsWhileFalling;
 
     //      *LayerMasks
     [SerializeField] private LayerMask GroundLayerMask;
-    [SerializeField] private LayerMask WallLayerMask;
 
+    //          Classes
+    [SerializeField] private WallJump wj;
     //              Functions
 
     //      *Defaults
     void Start()
     {
+        JumpsWhileFalling = 0;
         currentupdateindex = 0;
         FirstJumpCheck = 0f;
         JumpHoldTimer = DefaultHoldTime;
@@ -82,7 +86,7 @@ public class Movement : MonoBehaviour
         if (StartTimer)
         {
             JumpBufferTime -= Time.deltaTime;
-            if (Grounded && JumpBufferTime > 0)
+            if (Grounded && JumpBufferTime > 0 && JumpsWhileFalling <= 1 && XAxis != 0)
             {
                 Debug.LogError("Buffer Jump!");
                 BufferJump = true;
@@ -169,6 +173,7 @@ public class Movement : MonoBehaviour
         if (Physics2D.Raycast(transform.position, Vector3.down, RayDistance, GroundLayerMask))
         {
             Grounded = true;
+            JumpsWhileFalling = 0;
             rb.velocity = new Vector2(rb.velocity.x, 0);
             JumpHoldTimer = DefaultHoldTime;
             ReducedGravityScale = 0;
@@ -188,7 +193,14 @@ public class Movement : MonoBehaviour
         if (rb.velocity.y < 0)
         {
             InJump = false;
-            rb.gravityScale = IncreasedGravityScale;
+            if (Input.GetButtonDown("Jump"))
+            {
+                JumpsWhileFalling++;
+            }
+            if (!WallJump.TouchingWall)
+            {
+                rb.gravityScale = IncreasedGravityScale;
+            }
         }
         if (rb.velocity.y >= 0)
         {
