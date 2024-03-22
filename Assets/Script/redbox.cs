@@ -17,11 +17,14 @@ public class redbox : MonoBehaviour
     [SerializeField] TextMeshProUGUI Minute;
     [SerializeField] TextMeshProUGUI Second;
     [SerializeField] bool onbox;
-    public bool TimerOn;
+    private bool timerOn;
     [SerializeField] Rigidbody2D rbplayer;
     [SerializeField] GameObject image;
     [SerializeField] GameObject player;
     [SerializeField] TextMeshProUGUI text;
+
+    public bool TimerOn { get => timerOn; set => timerOn = value; }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -68,7 +71,7 @@ public class redbox : MonoBehaviour
         if(collision.gameObject.tag == "Player")
         {
             onbox = true;
-            text.text = "redy!?";
+            text.text = "Ready!?";
             countdownforpicture -= Time.deltaTime;
             if(countdownforpicture <= 0) {
                 image.SetActive(true);
@@ -87,7 +90,7 @@ public class redbox : MonoBehaviour
     private void OnCollisionExit2D(Collision2D collision)
     {
 
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.CompareTag("Player"))
         {
             onbox = false;
             countdownforpicture = defaultpic;

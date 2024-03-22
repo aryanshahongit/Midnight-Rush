@@ -10,27 +10,25 @@ public class Movement : MonoBehaviour
 {
     //              Pause
     public float[] FetchedValues;
-    public float[] recivedvalues;
-    public int currentupdateindex;
+    public float[] ReceivedValues;
+    public int CurrentUpdateIndex;
     public Pause p;
     //              Movement
     //      *Floats
-    [SerializeField] private float XAxis;
+    [SerializeField] public float XAxis;
     [SerializeField] private float PlayerSpeed;
     [SerializeField] private float MaxVelocity;
     [SerializeField] private float Acceleration;
     [SerializeField] private float DeAcceleration;
+    [SerializeField] private float IncreasedDeAcceleration;
+    [SerializeField] private float JumpCoolDown;
     //      *Bools
-
+    [SerializeField] private bool CanMove;
     //              Physics
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float IncreasedGravityScale;
     [SerializeField] private float NormalGravityScale;
     [SerializeField] private float ReducedGravityScale;
-    //              WallJumps
-    //      *Bools
-    [SerializeField] private bool WallJumpRightCollosion;
-    [SerializeField] private bool WallJumpLeftCollosion;
 
     //      *Floats
     [SerializeField] private float WallJumpForce;
@@ -43,8 +41,7 @@ public class Movement : MonoBehaviour
     [SerializeField] public bool InJump;
     [SerializeField] private bool StartTimer;
     [SerializeField] private bool BufferJump;
-    [SerializeField] private bool CanBhop;
-
+    [SerializeField] public bool BufferJumpException;
     //      *Floats
     [SerializeField] private float RayDistance;
     [SerializeField] private float JumpForce;
@@ -69,7 +66,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         JumpsWhileFalling = 0;
-        currentupdateindex = 0;
+        CurrentUpdateIndex = 0;
         FirstJumpCheck = 0f;
         JumpHoldTimer = DefaultHoldTime;
         InJump = false;
@@ -88,29 +85,30 @@ public class Movement : MonoBehaviour
             JumpBufferTime -= Time.deltaTime;
             if (Grounded && JumpBufferTime > 0 && JumpsWhileFalling <= 1 && XAxis != 0)
             {
-                Debug.LogError("Buffer Jump!");
+                BufferJumpException = true;
                 BufferJump = true;
+            }
+            else
+            {
+                BufferJump = false;
             }
         }
         if(BufferJump && Input.GetButtonDown("Jump"))
         {
+            BufferJumpException = false;
             BufferJump = false;
         }
         MovementHandler(); // Handles Moving,Velocity Clamp,Gravity,Log Outputs
         GroundCheck();// Ground Detection Using Ray Cast
         JumpKeyCheck();
         Logs();
-        /*WallJumpCollisions();*/
     }
 
 
     void FixedUpdate()
     {
-
         JumpCheck();
     }
-
-
 
     private void JumpCheck()
     {
@@ -134,10 +132,11 @@ public class Movement : MonoBehaviour
         }
         if (Grounded && BufferJump)
         {
+            BufferJumpException = false;
             BufferJump = false;
-
             Debug.LogError("Buffer Jump!");
-            rb.AddForce(new Vector2(500*XAxis, JumpForce * 10));
+            rb.velocity = Vector2.zero;
+            rb.AddForce(new Vector2(1000 * XAxis, JumpForce * 10));
         }
     }
 
@@ -154,6 +153,7 @@ public class Movement : MonoBehaviour
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpUpSmooth);
             }
+            BufferJumpException = false;
             BufferJump = false;
             JumpKey = false;
             HoldJumpKey = false;
@@ -207,16 +207,16 @@ public class Movement : MonoBehaviour
             rb.gravityScale = NormalGravityScale + ReducedGravityScale;
         }
 
-        if (rb.velocity.x <= MaxVelocity && rb.velocity.x >= -MaxVelocity)
+        if (rb.velocity.x <= MaxVelocity && rb.velocity.x >= -MaxVelocity && CanMove)
         {
             rb.velocity += new Vector2(XAxis * Time.deltaTime * Acceleration, 0);
-            rb.AddForce(new Vector2(XAxis, 0) * Time.deltaTime * PlayerSpeed);
+            rb.AddForce(PlayerSpeed * Time.deltaTime * new Vector2(XAxis, 0));
         }
-        if (rb.velocity.x > MaxVelocity && !BufferJump)
+        if (rb.velocity.x > MaxVelocity && !BufferJumpException)
         {
             rb.velocity = new Vector2(MaxVelocity, rb.velocity.y);
         }
-        if (rb.velocity.x < -MaxVelocity&& !BufferJump)
+        if (rb.velocity.x < -MaxVelocity && !BufferJumpException)
         {
             rb.velocity = new Vector2(-MaxVelocity, rb.velocity.y);
         }
@@ -230,6 +230,26 @@ public class Movement : MonoBehaviour
             {
                 rb.velocity += new Vector2(DeAcceleration * Time.deltaTime, 0);
             }
+            if (rb.velocity.x > 0 && Mathf.Abs(rb.velocity.x) > MaxVelocity)
+            {
+                rb.velocity -= new Vector2(IncreasedDeAcceleration * Time.deltaTime, 0);
+            }
+            if (rb.velocity.x < 0 && Mathf.Abs(rb.velocity.x) > MaxVelocity)
+            {
+                rb.velocity += new Vector2(IncreasedDeAcceleration * Time.deltaTime, 0);
+            }
+        }
+        if (!WallJump.TouchingWall)
+        {
+            CanMove = true;
+        }
+        else if (WallJump.TouchingWall && Grounded)
+        {
+            CanMove = true;
+        }
+        else
+        {
+            CanMove = false;
         }
     }
 
@@ -257,28 +277,28 @@ public class Movement : MonoBehaviour
         return FetchedValues;
     }
 
-    public void updatevalue()
+    public void UpdateValue()
     {
-        currentupdateindex = 0;
-        float[] recivedvalues = new float[12];
+        CurrentUpdateIndex = 0;
+        float[] ReceivedValues = new float[12];
         foreach (InputField d in p.fields)
         {
-            recivedvalues[currentupdateindex] = float.Parse(d.text);
-            currentupdateindex++;
+            ReceivedValues[CurrentUpdateIndex] = float.Parse(d.text);
+            CurrentUpdateIndex++;
 
         }
-        currentupdateindex = 0;
-        PlayerSpeed = recivedvalues[0];
-        MaxVelocity = recivedvalues[1];
-        Acceleration = recivedvalues[2];
-        DeAcceleration = recivedvalues[3];
-        IncreasedGravityScale = recivedvalues[4];
-        NormalGravityScale = recivedvalues[5];
-        ReducedGravityScale = recivedvalues[6];
-        JumpHoldTimer = recivedvalues[7];
-        DefaultHoldTime = recivedvalues[8];
-        GravityScale = recivedvalues[9];
-        rb.angularDrag = recivedvalues[10];
-        JumpForce = recivedvalues[11];
+        CurrentUpdateIndex = 0;
+        PlayerSpeed = ReceivedValues[0];
+        MaxVelocity = ReceivedValues[1];
+        Acceleration = ReceivedValues[2];
+        DeAcceleration = ReceivedValues[3];
+        IncreasedGravityScale = ReceivedValues[4];
+        NormalGravityScale = ReceivedValues[5];
+        ReducedGravityScale = ReceivedValues[6];
+        JumpHoldTimer = ReceivedValues[7];
+        DefaultHoldTime = ReceivedValues[8];
+        GravityScale = ReceivedValues[9];
+        rb.angularDrag = ReceivedValues[10];
+        JumpForce = ReceivedValues[11];
     }
 }

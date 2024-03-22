@@ -13,11 +13,6 @@ public class WallJump : MonoBehaviour
     [SerializeField] private LayerMask WallLayerMask;
     [SerializeField] private LayerMask GroundLayerMask;
     [SerializeField] private Movement mv;
-    // Start is called before the first frame update
-    void Start()
-    { 
-        
-    }
 
     private void CheckCollision()
     {
@@ -27,20 +22,19 @@ public class WallJump : MonoBehaviour
             if (Input.GetButtonDown("Jump") && !mv.Grounded && !mv.InJump)
             {
                 rb.velocity = Vector2.zero;
-                rb.AddForce(new Vector2(-XWallJump,YWallJump));
+                if (mv.XAxis != 0)
+                {
+                    rb.AddForce(new Vector2(XWallJump * mv.XAxis, YWallJump));
+                }
             }
         }
-        else
-        {
-            TouchingWall = false;
-        }
-        if (Physics2D.Raycast(transform.position, Vector2.left, RayDistance, WallLayerMask))
+        else if (Physics2D.Raycast(transform.position, Vector2.left, RayDistance, WallLayerMask))
         {
             TouchingWall = true;
             if (Input.GetButtonDown("Jump") && !mv.Grounded && !mv.InJump)
             {
                 rb.velocity = Vector2.zero;
-                rb.AddForce(new Vector2(XWallJump,YWallJump));
+                rb.AddForce(new Vector2(XWallJump * mv.XAxis, YWallJump));
             }
         }
         else

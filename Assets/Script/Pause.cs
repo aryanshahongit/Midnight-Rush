@@ -23,21 +23,19 @@ public class Pause : MonoBehaviour
     public InputField JumpForce;
     public InputField[] fields;
     public float[] FetchedValues;
-    public int currentindex;
-    public int currentupdateindex;
+    public int CurrentIndex;
+    public int CurrentUpdateIndex;
     public Movement mv;
-    public float[] newvalues;
+    public float[] NewValue;
     [SerializeField] GameObject PauseMenu;
     [SerializeField] redbox box;
-    [SerializeField] bool IsPaused;
     // Start is called before the first frame update
     void Start()
     {
-        IsPaused = false;
         PauseMenu.SetActive(false);
-       float[] newvalues = new float[12];
-        currentindex = 0;
-        currentupdateindex = 0;
+       float[] NewValues = new float[12];
+        CurrentIndex = 0;
+        CurrentUpdateIndex = 0;
         float[] FetchedValues = new float[12];
         
         InputField[] fields = new InputField[12];
@@ -56,10 +54,10 @@ public class Pause : MonoBehaviour
         FetchedValues = mv.FetchValues();
         foreach (InputField f in fields)
         {
-            f.text = FetchedValues[currentindex].ToString();
-            currentindex++;
+            f.text = FetchedValues[CurrentIndex].ToString();
+            CurrentIndex++;
         }
-        currentindex = 0;
+        CurrentIndex = 0;
     }
 
     // Update is called once per frame
@@ -72,29 +70,26 @@ public class Pause : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            changevalues();
-            mv.updatevalue();
-            unpause();
+            ChangeValue();
+            mv.UpdateValue();
+            UnPause();
 
         }
     }
 
-    private void unpause()
+    private void UnPause()
     {
         Time.timeScale = 1;
         PauseMenu.SetActive(false);
-        IsPaused = false;
     }
 
     private void pause()
     {
         Time.timeScale = 0;
         PauseMenu.SetActive(true);
-        IsPaused = true;
-
     }
 
-    public void changevalues()
+    public void ChangeValue()
     {
         fields = new InputField[12];
         fields[0] = PlayerSpeed;
@@ -109,8 +104,8 @@ public class Pause : MonoBehaviour
         fields[9] = GravityScale;
         fields[10] = AngularDrag;
         fields[11] = JumpForce;
-        currentindex = 0;
-        currentupdateindex = 0;
+        CurrentIndex = 0;
+        CurrentUpdateIndex = 0;
      
     }
 }
